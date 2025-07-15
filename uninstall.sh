@@ -15,7 +15,7 @@ docker volume rm portainer_data qbittorrent_config jellyfin_config jellyfin_cach
 sudo rm -rf /srv/media
 
 # Remove CasaOS
-sudo bash <(curl -fsSL https://get.casaos.io/uninstall.sh) | 
+sudo bash <(curl -fsSL https://get.casaos.io/uninstall.sh)
 
 # Remove ShellInABox and Samba
 sudo apt remove --purge -y shellinabox samba || true
