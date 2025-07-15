@@ -2,7 +2,7 @@
   "name": "qBittorrent",
   "description": "qBittorrent is a free and open-source BitTorrent client.",
   "icon": "https://upload.wikimedia.org/wikipedia/commons/6/66/New_qBittorrent_Logo.svg",
-  "image": "linuxserver/qbittorrent",
+  "image": "qbittorrentofficial/qbittorrent-nox",
   "network_model": "bridge",
   "port_map": {
     "8181": "8181",
