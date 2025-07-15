@@ -25,13 +25,13 @@ Running this on an existing setup **will remove Docker containers** if they shar
 chmod +x setup_pre.sh setup_post.sh
 ```
 ```shell
-./setup_pre.sh
+sudo ./setup_pre.sh
 ```
 
 ** make sure to reboot the system after running setup_pre.sh
 
 ```shell
-./setup_post.sh
+sudo ./setup_post.sh
 ```
 
 You can edit the docker images/volumes according to yourself. This is a simple script to help out automation.
