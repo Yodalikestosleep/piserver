@@ -1,4 +1,4 @@
-Raspberry PI docker media server setup script
+Turn your Raspberry Pi into a basic mini server with this automated script.
 
 This script automates the installation of basic self-hosted media and management server on raspberry-pi.
 
@@ -39,7 +39,7 @@ sudo ./setup_pre.sh
 ```shell
 sudo ./setup_post.sh
 ```
-** all the logs are in log.txt**
+
 You can edit the docker images/volumes according to yourself. This is a simple script to help out automation.
 
 To uninstall the script use:
