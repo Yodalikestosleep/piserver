@@ -39,7 +39,7 @@ sudo ./setup_pre.sh
 ```shell
 sudo ./setup_post.sh
 ```
-
+** all the logs are in log.txt**
 You can edit the docker images/volumes according to yourself. This is a simple script to help out automation.
 
 To uninstall the script use:

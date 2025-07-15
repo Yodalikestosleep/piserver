@@ -1,7 +1,7 @@
 {
   "name": "Portainer",
   "description": "A lightweight management UI for Docker.",
-  "icon": "https://portainer.io/images/logos/logo-icon.svg",
+  "icon": "https://w7.pngwing.com/pngs/283/657/png-transparent-portainer-hd-logo-thumbnail.png",
   "image": "portainer/portainer-ce",
   "network_model": "bridge",
   "port_map": {

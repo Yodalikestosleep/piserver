@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
+exec > log.txt 2>&1
+
 green='\033[0;32m'
 nocl='\033[0m'
 
-echo -e "${green}Starting post reboot setup...${nocl}"
+echo -e "${green}Starting post reboot setup...${nocl}" >&2
 
 docker rm -f portainer || true
 docker run -d \
@@ -15,9 +17,7 @@ docker run -d \
   -e TEMPLATES_URL="https://raw.githubusercontent.com/TomChantler/portainer-templates/refs/heads/v3/templates_v3.json" \
   portainer/portainer-ce
 
-echo -e "${green}Portainer restarted with custom templates.${nocl}"
-
-sudo mkdir -p /srv/media
+sudo mkdir -p /srv/media/downloads /srv/media/movies
 sudo chown -R $USER:$USER /srv/media
 
 docker volume create qbittorrent_config
@@ -25,15 +25,14 @@ docker rm -f qbittorrent || true
 docker run -d \
   --name=qbittorrent \
   -e WEBUI_PORT=8181 \
+  -e TORRENTING_PORT=6881 \
   -p 8181:8181 \
   -p 6881:6881 \
   -p 6881:6881/udp \
   -v qbittorrent_config:/config \
-  -v /srv/media:/downloads \
+  -v /srv/media/downloads:/downloads \
   --restart=always \
   linuxserver/qbittorrent
-
-echo -e "${green}qBittorrent installed.${nocl}"
 
 docker volume create jellyfin_config
 docker volume create jellyfin_cache
@@ -48,16 +47,14 @@ docker run -d \
   -v /srv/media:/media \
   jellyfin/jellyfin
 
-echo -e "${green}Jellyfin installed.${nocl}"
-echo -e "${green}Installing samba with username : smbuser, Enter the password when prompted.${nocl}"
+echo -e "${green}Installing samba with username: smbuser. Enter password when prompted.${nocl}" >&2
 
 sudo apt install -y samba
 
-sudo adduser --disabled-password --gecos "" smbuser
-sudo smbpasswd -a smbuser
+sudo adduser --disabled-password --gecos "" smbuser </dev/tty >&2
+sudo smbpasswd -a smbuser </dev/tty >&2
 
 sudo tee -a /etc/samba/smb.conf > /dev/null <<EOF
-
 [media]
    path = /srv/media
    browseable = yes
@@ -71,10 +68,16 @@ EOF
 sudo chown -R smbuser:smbuser /srv/media
 sudo systemctl restart smbd
 
-echo -e "${green}Samba installed. Share available at /<your-ip>/media (user: smbuser)${nocl}"
+echo -e "${green}Samba installed. Share available at //<your-ip>/media (user: smbuser)${nocl}" >&2
 
-info_file="setup_info.txt"
-cat > "$info_file" <<EOF
+mkdir -p /var/lib/casaos/apps/installed
+mv apps/*.json /var/lib/casaos/apps/installed 2>/dev/null || mv apps/*.json /opt/casaos/apps 2>/dev/null
+
+mkdir -p /srv/media/logs
+echo -e "${green}Moving example files...${nocl}" >&2
+find /srv/media/downloads -type f -name "*.mkv" -exec mv {} /srv/media/movies/ \;
+
+cat > setup_info.txt <<EOF
 =======================================
        Application ports and info
 =======================================
@@ -84,25 +87,22 @@ Portainer:          http://<your-ip>:9000
 qBittorrent:        http://<your-ip>:8181
 Jellyfin:           http://<your-ip>:8096
 CasaOS Dashboard:   http://<your-ip>:80
-Samba Share:        /<your-ip>/media (user: smbuser)
+Samba Share:        //<your-ip>/media (user: smbuser)
 
 Containers:
-- portainer      -> ports: 9000, 9443
-- qbittorrent    -> ports: 8181, 6881
-- jellyfin       -> port: 8096
-
-Shared Media Directory:
-- /srv/media (used by jellyfin & qbittorrent)
-- Network Share: <your-ip>/media
+- portainer
+- qbittorrent
+- jellyfin
 
 Volumes:
 - portainer_data
 - qbittorrent_config
 - jellyfin_config
 - jellyfin_cache
-- srv/media (shared by jellyfina and qbittorrent)
 
+Media Folder:
+- /srv/media (shared and used by apps)
 EOF
 
-echo -e "${green}Setup complete. Check setup_info.txt for access info.${nocl}"
-echo -e "${green}Samba is using the same folder as qbittorrent and jellyfin.${nocl}"
+echo -e "${green}Setup complete. Check setup_info.txt for access info.${nocl}" >&2
+
