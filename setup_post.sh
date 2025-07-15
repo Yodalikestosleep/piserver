@@ -26,15 +26,17 @@ docker volume create qbittorrent_config
 docker rm -f qbittorrent || true
 docker run -d \
   --name=qbittorrent \
-  -e WEBUI_PORT=8181 \
-  -e TORRENTING_PORT=6881 \
+  -e QBT_WEBUI_PORT=8181 \
+  -e QBT_TORRENT_PORT=6881 \
   -p 8181:8181 \
   -p 6881:6881 \
   -p 6881:6881/udp \
+  -p 6881:6881/tcp \
   -v qbittorrent_config:/config \
   -v /srv/media/downloads:/downloads \
   --restart=always \
-  ghcr.io/linuxserver/qbittorrent
+  qbittorrentofficial/qbittorrent-nox
+
 
   
 echo -e "${green}Installing jellyfin${nocl}"
