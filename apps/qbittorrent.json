@@ -10,7 +10,8 @@
     "6881/udp": "6881/udp"
   },
   "envs": [
-    { "key": "WEBUI_PORT", "value": "8181" }
+    { "key": "WEBUI_PORT", "value": "8181" },
+    { "key": "TORRENTING_PORT", "value": "6881" }
   ],
   "volumes": [
     {
@@ -19,9 +20,8 @@
     },
     {
       "container": "/downloads",
-      "host": "qbittorrent_downloads"
+      "host": "/srv/media"
     }
   ],
   "restart_policy": "always"
 }
-
