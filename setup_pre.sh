@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-exec > log.txt 2>&1
+
 
 green='\033[0;32m'
 nocl='\033[0m'
