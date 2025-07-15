@@ -34,7 +34,9 @@ docker run -d \
   -v qbittorrent_config:/config \
   -v /srv/media/downloads:/downloads \
   --restart=always \
-  lscr.io/linuxserver/qbittorrent
+  ghcr.io/linuxserver/qbittorrent
+
+  
 echo -e "${green}Installing jellyfin${nocl}"
 
 docker volume create jellyfin_config
