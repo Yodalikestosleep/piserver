@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
-exec > log.txt 2>&1
+
 
 green='\033[0;32m'
 nocl='\033[0m'
 
-echo -e "${green}Starting post reboot setup...${nocl}" >&2
+echo -e "${green}Starting post reboot setup...${nocl}"
+echo -e "${green}Installing Portainer${nocl}"
 
 docker rm -f portainer || true
 docker run -d \
@@ -19,6 +20,7 @@ docker run -d \
 
 sudo mkdir -p /srv/media/downloads /srv/media/movies
 sudo chown -R $USER:$USER /srv/media
+echo -e "${green}Installing qbittorrent${nocl}"
 
 docker volume create qbittorrent_config
 docker rm -f qbittorrent || true
@@ -33,6 +35,7 @@ docker run -d \
   -v /srv/media/downloads:/downloads \
   --restart=always \
   linuxserver/qbittorrent
+echo -e "${green}Installing jellyfin${nocl}"
 
 docker volume create jellyfin_config
 docker volume create jellyfin_cache
@@ -47,7 +50,7 @@ docker run -d \
   -v /srv/media:/media \
   jellyfin/jellyfin
 
-echo -e "${green}Installing samba with username: smbuser. Enter password when prompted.${nocl}" >&2
+echo -e "${green}Installing samba with username: smbuser. Enter password when prompted.${nocl}"
 
 sudo apt install -y samba
 
@@ -68,13 +71,13 @@ EOF
 sudo chown -R smbuser:smbuser /srv/media
 sudo systemctl restart smbd
 
-echo -e "${green}Samba installed. Share available at //<your-ip>/media (user: smbuser)${nocl}" >&2
+echo -e "${green}Samba installed. Share available at //<your-ip>/media (user: smbuser)${nocl}" 
 
 mkdir -p /var/lib/casaos/apps/installed
 mv apps/*.json /var/lib/casaos/apps/installed 2>/dev/null || mv apps/*.json /opt/casaos/apps 2>/dev/null
 
 mkdir -p /srv/media/logs
-echo -e "${green}Moving example files...${nocl}" >&2
+echo -e "${green}Moving files...${nocl}" 
 find /srv/media/downloads -type f -name "*.mkv" -exec mv {} /srv/media/movies/ \;
 
 cat > setup_info.txt <<EOF
@@ -104,5 +107,6 @@ Media Folder:
 - /srv/media (shared and used by apps)
 EOF
 
-echo -e "${green}Setup complete. Check setup_info.txt for access info.${nocl}" >&2
+echo -e "${green}Setup complete. Check setup_info.txt for access info.${nocl}" 
+echo -e "${green}NOTE: qbittorrent and jellyfin are using the shared folder /srv/media/.${nocl}" 
 
