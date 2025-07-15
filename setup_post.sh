@@ -3,74 +3,80 @@ set -e
 green='\033[0;32m'
 nocl='\033[0m'
 
-echo "${green}Starting post reboot setup${nocl}"
+echo -e "${green}Starting post reboot setup...${nocl}"
 
 docker rm -f portainer || true
 docker run -d \
-	-p 9000:9000 -p 9443:9443 \
-	--name=portainer \
-	--restart=always \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	-v portainer_data:/data \
-	-e TEMPLATES_URL="https://raw.githubusercontent.com/TomChantler/portainer-templates/refs/heads/v3/templates_v3.json" \
-	portainer/portainer-ce
-echo "${green}Changed the TEMPLATES_URL with v3 URL by TomChantler${nocl}"
-echo "${green}Portainer Restarted.${nocl}"
+  -p 9000:9000 -p 9443:9443 \
+  --name=portainer \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \
+  -e TEMPLATES_URL="https://raw.githubusercontent.com/TomChantler/portainer-templates/refs/heads/v3/templates_v3.json" \
+  portainer/portainer-ce
+
+echo -e "${green}Portainer restarted with custom templates.${nocl}"
+
+sudo mkdir -p /srv/media
+sudo chown -R $USER:$USER /srv/media
 
 docker volume create qbittorrent_config
-docker volume create qbittorrent_downloads
 docker rm -f qbittorrent || true
 docker run -d \
-	--name=qbittorrent \
-	-e WEBUI_PORT=8181 \
-	-p 8181:8181 \
-	-p 6881:6881 \
-	-p 6881:6881/udp \
-	-v qbittorrent_config:/config \
-	-v qbittorrent_downloads:/downloads \
-	--restart=always \
-	linuxserver/qbittorrent
-echo "${green}qBittorrent installed${nocl}"
+  --name=qbittorrent \
+  -e WEBUI_PORT=8181 \
+  -p 8181:8181 \
+  -p 6881:6881 \
+  -p 6881:6881/udp \
+  -v qbittorrent_config:/config \
+  -v /srv/media:/downloads \
+  --restart=always \
+  linuxserver/qbittorrent
+
+echo -e "${green}qBittorrent installed.${nocl}"
 
 docker volume create jellyfin_config
 docker volume create jellyfin_cache
-docker volume create jellyfin_media
 docker rm -f jellyfin || true
 docker run -d \
-	--name=jellyfin \
-	--user $(id -u):$(id -g) \
-	--restart=always \
-	-p 8096:8096 \
-	-v jellyfin_config:/config \
-	-v jellyfin_cache:/cache \
-	-v jellyfin_media:/media \
-	jellyfin/jellyfin
-echo "${green}Jellyfin installed${nocl}"
+  --name=jellyfin \
+  --user $(id -u):$(id -g) \
+  --restart=always \
+  -p 8096:8096 \
+  -v jellyfin_config:/config \
+  -v jellyfin_cache:/cache \
+  -v /srv/media:/media \
+  jellyfin/jellyfin
 
-echo "${green}Please wait ....${nocl}"
-sleep 30s
+echo -e "${green}Jellyfin installed.${nocl}"
+echo -e "${green}Installing samba with username : smbuser, Enter the password when prompted.${nocl}"
 
-echo "${green}Adding Docker apps to CasaOS...${nocl}"
-APPS_DIR="/var/lib/casaos/apps"
+sudo apt install -y samba
 
-# Create folders and copy configs
-sudo mkdir -p "$APPS_DIR/portainer"
-sudo cp apps/portainer.json "$APPS_DIR/portainer/conf.json"
+sudo adduser --disabled-password --gecos "" smbuser
+sudo smbpasswd -a smbuser
 
-sudo mkdir -p "$APPS_DIR/qbittorrent"
-sudo cp apps/qbittorrent.json "$APPS_DIR/qbittorrent/conf.json"
+sudo tee -a /etc/samba/smb.conf > /dev/null <<EOF
 
-sudo mkdir -p "$APPS_DIR/jellyfin"
-sudo cp apps/jellyfin.json "$APPS_DIR/jellyfin/conf.json"
+[media]
+   path = /srv/media
+   browseable = yes
+   writable = yes
+   valid users = smbuser
+   create mask = 0770
+   directory mask = 0770
+   public = no
+EOF
 
-# Restart CasaOS
-sudo systemctl restart casaos
-echo "${green}CasaOS apps added. Refresh the dashboard.${nocl}"
+sudo chown -R smbuser:smbuser /srv/media
+sudo systemctl restart smbd
+
+echo -e "${green}Samba installed. Share available at /<your-ip>/media (user: smbuser)${nocl}"
 
 info_file="setup_info.txt"
 cat > "$info_file" <<EOF
 =======================================
-       Installed Application Info
+       Application ports and info
 =======================================
 
 Shell In A Box:     http://<your-ip>:4200
@@ -78,22 +84,25 @@ Portainer:          http://<your-ip>:9000
 qBittorrent:        http://<your-ip>:8181
 Jellyfin:           http://<your-ip>:8096
 CasaOS Dashboard:   http://<your-ip>:80
+Samba Share:        /<your-ip>/media (user: smbuser)
 
 Containers:
 - portainer      -> ports: 9000, 9443
 - qbittorrent    -> ports: 8181, 6881
 - jellyfin       -> port: 8096
 
-Volumes:
-- qbittorrent_config
-- qbittorrent_downloads
-- jellyfin_config
-- jellyfin_media
-- jellyfin_cache
-- portainer_data
+Shared Media Directory:
+- /srv/media (used by jellyfin & qbittorrent)
+- Network Share: <your-ip>/media
 
-All containers are set to restart automatically and have persistent volumes.
+Volumes:
+- portainer_data
+- qbittorrent_config
+- jellyfin_config
+- jellyfin_cache
+- srv/media (shared by jellyfina and qbittorrent)
+
 EOF
 
-echo "${green}Setup complete. Please check setup_info.txt for port info.${nocl}"
-
+echo -e "${green}Setup complete. Check setup_info.txt for access info.${nocl}"
+echo -e "${green}Samba is using the same folder as qbittorrent and jellyfin.${nocl}"
