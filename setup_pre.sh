@@ -5,7 +5,7 @@ exec > log.txt 2>&1
 green='\033[0;32m'
 nocl='\033[0m'
 
-echo -e "${green}Starting setup${nocl}" >&2
+echo -e "${green}Starting setup${nocl}"
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y shellinabox
 sudo systemctl enable shellinabox
@@ -27,6 +27,6 @@ docker run -d \
 
 curl -fsSL https://get.casaos.io | bash
 
-echo -e "${green}Please reboot the system once for setup to take effect.${nocl}" >&2
-echo -e "${green}After reboot, run setup_post.sh${nocl}" >&2
+echo -e "${green}Please reboot the system once for setup to take effect.${nocl}"
+echo -e "${green}After reboot, run setup_post.sh${nocl}" 
 
