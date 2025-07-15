@@ -1,0 +1,26 @@
+{
+  "name": "Jellyfin",
+  "description": "The Free Software Media System.",
+  "icon": "https://upload.wikimedia.org/wikipedia/commons/6/61/Jellyfin_Logo.svg",
+  "image": "jellyfin/jellyfin",
+  "network_model": "bridge",
+  "port_map": {
+    "8096": "8096"
+  },
+  "volumes": [
+    {
+      "container": "/config",
+      "host": "jellyfin_config"
+    },
+    {
+      "container": "/cache",
+      "host": "jellyfin_cache"
+    },
+    {
+      "container": "/media",
+      "host": "jellyfin_media"
+    }
+  ],
+  "restart_policy": "always"
+}
+

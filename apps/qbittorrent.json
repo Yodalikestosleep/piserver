@@ -1,0 +1,27 @@
+{
+  "name": "qBittorrent",
+  "description": "qBittorrent is a free and open-source BitTorrent client.",
+  "icon": "https://upload.wikimedia.org/wikipedia/commons/6/66/New_qBittorrent_Logo.svg",
+  "image": "linuxserver/qbittorrent",
+  "network_model": "bridge",
+  "port_map": {
+    "8181": "8181",
+    "6881": "6881",
+    "6881/udp": "6881/udp"
+  },
+  "envs": [
+    { "key": "WEBUI_PORT", "value": "8181" }
+  ],
+  "volumes": [
+    {
+      "container": "/config",
+      "host": "qbittorrent_config"
+    },
+    {
+      "container": "/downloads",
+      "host": "qbittorrent_downloads"
+    }
+  ],
+  "restart_policy": "always"
+}
+

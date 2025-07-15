@@ -1,0 +1,23 @@
+{
+  "name": "Portainer",
+  "description": "A lightweight management UI for Docker.",
+  "icon": "https://portainer.io/images/logos/logo-icon.svg",
+  "image": "portainer/portainer-ce",
+  "network_model": "bridge",
+  "port_map": {
+    "9000": "9000",
+    "9443": "9443"
+  },
+  "volumes": [
+    {
+      "container": "/var/run/docker.sock",
+      "host": "/var/run/docker.sock"
+    },
+    {
+      "container": "/data",
+      "host": "portainer_data"
+    }
+  ],
+  "restart_policy": "always"
+}
+
