@@ -31,7 +31,6 @@ docker run -d \
   -p 8181:8181 \
   -p 6881:6881 \
   -p 6881:6881/udp \
-  -p 6881:6881/tcp \
   -v qbittorrent_config:/config \
   -v /srv/media/downloads:/downloads \
   --restart=always \
